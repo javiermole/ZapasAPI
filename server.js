@@ -5,6 +5,8 @@ const app = express();
 app.use(cors()); // Habilita CORS para evitar problemas de acceso desde el frontend
 app.use(express.json()); // Permite recibir datos en formato JSON
 
+let zapatillas = [];
+
 // Rutas CRUD
 
 // ✅ GET: Obtener todas las zapatillas
