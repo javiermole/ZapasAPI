@@ -10,7 +10,7 @@ let zapatillas = [];
 // Rutas CRUD
 
 // ✅ GET: Obtener todas las zapatillas
-app.get("/zapatillas", (req, res) => res.json(shoe));
+app.get("/zapatillas", (req, res) => res.json(zapatillas));
 
 app.get("/json", (req, res) => {
   res.json(zapatillas);
