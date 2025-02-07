@@ -10,6 +10,10 @@ app.use(express.json()); // Permite recibir datos en formato JSON
 // ✅ GET: Obtener todas las zapatillas
 app.get("/zapatillas", (req, res) => res.json(shoe));
 
+app.get("/json", (req, res) => {
+  res.json(zapatillas);
+});
+
 // ✅ GET: Obtener una zapatilla por ID
 app.get("/zapatillas/:id", (req, res) => {
   const zapatilla = zapatillas.find(p => p.id == req.params.id);
