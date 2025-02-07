@@ -8,7 +8,7 @@ app.use(express.json()); // Permite recibir datos en formato JSON
 // Rutas CRUD
 
 // ✅ GET: Obtener todas las zapatillas
-app.get("/zapatillas", (req, res) => res.json(zapatillas));
+app.get("/zapatillas", (req, res) => res.json(shoe));
 
 // ✅ GET: Obtener una zapatilla por ID
 app.get("/zapatillas/:id", (req, res) => {
