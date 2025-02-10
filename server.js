@@ -1,56 +1,83 @@
-const express = require("express"); // Importa Express
-const cors = require("cors"); // Permite conexiones desde otros dominios
+const express = require("express");
+const SneaksAPI = require("sneaks-api");
+const cors = require("cors");
 
 const app = express();
-app.use(cors()); // Habilita CORS para evitar problemas de acceso desde el frontend
-app.use(express.json()); // Permite recibir datos en formato JSON
+const sneaks = new SneaksAPI();
 
-let zapatillas = [];
+app.use(cors());
 
-// Rutas CRUD
-
-// ✅ GET: Obtener todas las zapatillas
-app.get("/zapatillas", (req, res) => res.json(zapatillas));
-
-app.get("/json", (req, res) => {
-  res.json(zapatillas);
+// 1 Obtener información de una zapatilla por su ID
+app.get('/id/:id', (req, res) => {
+    sneaks.findOne(req.params.id, (error, shoe) => {
+        if (error) {
+            res.status(404).json({ error: "Product Not Found" });
+        } else {
+            res.json(shoe);
+        }
+    });
 });
 
-// ✅ GET: Obtener una zapatilla por ID
-app.get("/zapatillas/:id", (req, res) => {
-  const zapatilla = zapatillas.find(p => p.id == req.params.id);
-  if (!zapatilla) return res.status(404).json({ error: "No encontrada" });
-  res.json(zapatilla);
+// 2 Obtener precios de una zapatilla específica
+app.get('/id/:id/prices', (req, res) => {
+    sneaks.getProductPrices(req.params.id.toUpperCase(), (error, prices) => {
+        if (error) {
+            res.status(404).json({ error: "Product Not Found" });
+        } else {
+            res.json(prices);
+        }
+    });
 });
 
-// ✅ GET: Buscar zapatillas por marca
-app.get("/zapatillas/marca/:marca", (req, res) => {
-  const resultado = zapatillas.filter(p => p.marca.toLowerCase() === req.params.marca.toLowerCase());
-  if (resultado.length === 0) return res.status(404).json({ error: "No se encontraron zapatillas de esa marca" });
-  res.json(resultado);
+// 3 Obtener las zapatillas más populares
+app.get('/home', (req, res) => {
+    const count = req.query.count || 40; // Si no hay parámetro, devuelve 40 resultados
+    sneaks.getMostPopular(count, (error, products) => {
+        if (error) {
+            res.status(500).json({ error: "Error fetching popular products" });
+        } else {
+            res.json(products);
+        }
+    });
 });
 
-// ✅ POST: Agregar una zapatilla
-app.post("/zapatillas", (req, res) => {
-  const nuevaZapatilla = { id: zapatillas.length + 1, ...req.body };
-  zapatillas.push(nuevaZapatilla);
-  res.status(201).json(nuevaZapatilla);
+// 4 Buscar zapatillas por palabra clave
+app.get('/search/:shoe', (req, res) => {
+    const count = req.query.count || 40;
+    sneaks.getProducts(req.params.shoe, count, (error, products) => {
+        if (error) {
+            res.status(500).json({ error: "Error fetching products" });
+        } else {
+            res.json(products);
+        }
+    });
 });
 
-// ✅ PUT: Modificar una zapatilla
-app.put("/zapatillas/:id", (req, res) => {
-  const index = zapatillas.findIndex(p => p.id == req.params.id);
-  if (index === -1) return res.status(404).json({ error: "No encontrada" });
-  zapatillas[index] = { id: Number(req.params.id), ...req.body };
-  res.json(zapatillas[index]);
+
+app.get('/shoes2', function(req, res){
+    sneaks.findAll( function(error, products){
+        if (error) {
+            console.log(error)
+            res.send("No Products In Database");
+          } else {
+            res.json(products);
+          }
+    })
+});
+// 5 Obtener todas las zapatillas en la base de datos
+app.get('/shoes', (req, res) => {
+    sneaks.findAll((error, products) => {
+        if (error) {
+            res.status(500).json({ error: "No Products In Database" });
+        } else {
+            res.json(products);
+        }
+    });
 });
 
-// ✅ DELETE: Eliminar una zapatilla
-app.delete("/zapatillas/:id", (req, res) => {
-  const index = zapatillas.findIndex(p => p.id == req.params.id);
-  if (index === -1) return res.status(404).json({ error: "No encontrada" });
-  zapatillas.splice(index, 1);
-  res.json({ mensaje: "Eliminada correctamente" });
+// 6 Redirección de la ruta raíz a /home
+app.get('/', (req, res) => {
+    res.redirect('/home');
 });
 
 // Levantar servidor en el puerto 3000
